@@ -22,34 +22,44 @@ Abstract over different graph databases (Neo4j, Neptune, RDF stores) similar to 
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Application Layer                         │
-│  (User code using graph queries with LLM reasoning)          │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────────┐
-│               Graph Query Components                         │
-│  • GraphQuery (base Component)                               │
-│  • CypherQuery, SparqlQuery (query builders)                 │
-│  • GraphTraversal (multi-hop patterns)                       │
-│  • GraphResult (formatted results)                           │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────────┐
-│           LLM-Guided Query Construction                      │
-│  • QueryInstruction (natural language → query)               │
-│  • QueryValidation (check query correctness)                 │
-│  • QueryRepair (fix malformed queries)                       │
-│  • @generative functions for query generation                │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────────┐
-│              Graph Backend Abstraction                       │
-│  • GraphBackend (abstract base)                              │
-│  • Neo4jBackend, NeptuneBackend, RDFBackend                  │
-│  • Query execution and result parsing                        │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Layer1["🔷 LAYER 1: Application Layer"]
+        direction TB
+        App["User code using graph queries<br/>with LLM reasoning"]
+    end
+
+    subgraph Layer2["🔷 LAYER 2: Graph Query Components"]
+        direction TB
+        L2_1["GraphQuery (base Component)"]
+        L2_2["CypherQuery, SparqlQuery<br/>(query builders)"]
+        L2_3["GraphTraversal<br/>(multi-hop patterns)"]
+        L2_4["GraphResult<br/>(formatted results)"]
+    end
+
+    subgraph Layer3["🔷 LAYER 3: LLM-Guided Query Construction"]
+        direction TB
+        L3_1["QueryInstruction<br/>(natural language → query)"]
+        L3_2["QueryValidation<br/>(check query correctness)"]
+        L3_3["QueryRepair<br/>(fix malformed queries)"]
+        L3_4["@generative functions<br/>for query generation"]
+    end
+
+    subgraph Layer4["🔷 LAYER 4: Graph Backend Abstraction"]
+        direction TB
+        L4_1["GraphBackend<br/>(abstract base)"]
+        L4_2["Neo4jBackend, NeptuneBackend,<br/>RDFBackend"]
+        L4_3["Query execution and<br/>result parsing"]
+    end
+
+    Layer1 --> Layer2
+    Layer2 --> Layer3
+    Layer3 --> Layer4
+
+    style Layer1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px
+    style Layer2 fill:#e3f2fd,stroke:#1565c0,stroke-width:3px
+    style Layer3 fill:#fff3e0,stroke:#ef6c00,stroke-width:3px
+    style Layer4 fill:#f3e5f5,stroke:#6a1b9a,stroke-width:3px
 ```
 
 ---
@@ -177,6 +187,7 @@ class GraphEdge:
 ---
 
 ## Core Design: Components
+![KGRag example flowchart](GraphRag.drawio.svg)
 
 ### Mellea Component Pattern
 
@@ -1355,87 +1366,10 @@ This example shows how the different layers work together when processing a natu
 - **Action**: LLM generates natural language answer using graph context
 - **Output**: "Keanu Reeves and Carrie-Anne Moss acted in The Matrix."
 
-### Mermaid Flow Diagram
+### Flow Diagram
 
-**Key Insight**: Each layer is shown as a subgraph with clear boundaries. Input/Output data are outside layers, while intermediate data processing happens inside layer boundaries.
 
-```mermaid
-flowchart TD
-    A["📝 INPUT DATA<br/>Natural Language Query<br/>────────<br/>'who act in The Matrix'"]
 
-    subgraph Layer1["🔷 LAYER 1: Application Layer"]
-        B["Receives question<br/>Decides to query graph"]
-        B1["📦 Prepare data for Layer 3:<br/>────────<br/>nl_query: 'who act in The Matrix'<br/>graph_schema: schema definition<br/>examples: few-shot examples"]
-        B --> B1
-
-        G["LLM generates final answer<br/>using formatted graph context"]
-    end
-
-    subgraph Layer3["🔷 LAYER 3: LLM-Guided Query Construction"]
-        D["@generative function:<br/>natural_language_to_cypher()"]
-        D0["📦 Generated CypherQuery<br/>────────<br/>query_string:<br/>'MATCH (m:Movie {title: $title})<br/>&lt;-[:ACTED_IN]-(p:Person)<br/>RETURN p.name'<br/>────────<br/>parameters: {'title': 'The Matrix'}"]
-        D1{"✅ Validate Query<br/>────<br/>Syntax OK?<br/>Schema OK?<br/>Returns data?"}
-        D2["📦 Validated<br/>CypherQuery"]
-        D3["🔧 Repair Query<br/>using error feedback"]
-
-        D --> D0
-        D0 --> D1
-        D1 -->|"✓ Valid"| D2
-        D1 -->|"✗ Invalid"| D3
-        D3 --> D1
-    end
-
-    subgraph Layer4["🔷 LAYER 4: Graph Backend Abstraction"]
-        E["Neo4jBackend.execute_query()"]
-        E1["📦 Neo4j Raw Records<br/>────────<br/>{p.name: 'Keanu Reeves'}<br/>{p.name: 'Carrie-Anne Moss'}<br/>{p.name: 'Laurence Fishburne'}<br/>{p.name: 'Hugo Weaving'}"]
-        E2["📦 Parse to Graph Structures<br/>────────<br/>GraphNode(id='1', label='Person',<br/>  props={'name': 'Keanu Reeves'})<br/>+ 3 more Person nodes<br/>+ 4 ACTED_IN edges"]
-        E3["📦 Create GraphResult Component<br/>────────<br/>nodes: [4 Person nodes]<br/>edges: [4 ACTED_IN edges]<br/>format_style: 'natural'"]
-
-        E --> E1
-        E1 --> E2
-        E2 --> E3
-    end
-
-    subgraph Layer2["🔷 LAYER 2: Graph Query Components"]
-        F["GraphResult.format_for_llm()"]
-        F1["📦 Formatted Text<br/>────────<br/>'Keanu Reeves acted in The Matrix.<br/>Carrie-Anne Moss acted in The Matrix.<br/>Laurence Fishburne acted in The Matrix.<br/>Hugo Weaving acted in The Matrix.'"]
-
-        F --> F1
-    end
-
-    H["📝 OUTPUT DATA<br/>Final Natural Language Answer<br/>────────<br/>'The Matrix starred<br/>Keanu Reeves, Carrie-Anne Moss,<br/>Laurence Fishburne,<br/>and Hugo Weaving.'"]
-
-    %% Flow between layers
-    A --> Layer1
-    B1 --> Layer3
-    D2 --> Layer4
-    E3 --> Layer2
-    F1 --> G
-    G --> H
-
-    %% Styling for Input/Output Data
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:4px,color:#000
-    style H fill:#e8f5e9,stroke:#388e3c,stroke-width:4px,color:#000
-
-    %% Styling for intermediate DATA nodes
-    style B1 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style D0 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style D2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style E1 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style E2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style E3 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style F1 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-
-    %% Styling for validation/repair nodes
-    style D1 fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000
-    style D3 fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000
-
-    %% Styling for subgraphs (layers)
-    style Layer1 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
-    style Layer3 fill:#e1f5fe,stroke:#0277bd,stroke-width:3px
-    style Layer4 fill:#fff8e1,stroke:#f57f17,stroke-width:3px
-    style Layer2 fill:#f1f8e9,stroke:#558b2f,stroke-width:3px
-```
 
 ### Key Design Points
 
