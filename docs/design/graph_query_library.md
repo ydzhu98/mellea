@@ -18,10 +18,6 @@ Query components compose naturally and follow functional patterns (immutable upd
 ### 4. GraphDB Abstraction
 Abstract over different graph databases (Neo4j, Neptune, RDF stores) similar to how Mellea abstracts LLM backends.
 
-The following is an example of how the data flow through the system. (Note, we use neo4j database as an example but the implimentation is graph database agnostic and the difference only exist in layer 4).
-
-![KGRag example flowchart](GraphRag.drawio.svg)
-
 ---
 
 ## Architecture Overview
@@ -65,6 +61,9 @@ flowchart TB
     style Layer3 fill:#fff3e0,stroke:#ef6c00,stroke-width:3px
     style Layer4 fill:#f3e5f5,stroke:#6a1b9a,stroke-width:3px
 ```
+
+The following is an example of how the data flow through the system when user give a question. (Note, we use neo4j database as an example but the implimentation is graph database agnostic and the difference only exist in layer 4).
+![KGRag example flowchart](GraphRag.drawio.svg)
 
 ---
 
