@@ -15,8 +15,12 @@ Query construction supports validation and iterative repair using Sampling Strat
 ### 3. Composability and Immutability
 Query components compose naturally and follow functional patterns (immutable updates via `deepcopy`).
 
-### 4. Backend Abstraction
+### 4. GraphDB Abstraction
 Abstract over different graph databases (Neo4j, Neptune, RDF stores) similar to how Mellea abstracts LLM backends.
+
+The following is an example of how the data flow through the system. (Note, we use neo4j database as an example but the implimentation is graph database agnostic and the difference only exist in layer 4).
+
+![KGRag example flowchart](GraphRag.drawio.svg)
 
 ---
 
@@ -112,15 +116,6 @@ mellea-contribs/kg/
 └── README.md                      # Documentation
 ```
 
-**Key Changes from Original Design**:
-1. **Repository**: `mellea-contribs` instead of `mellea` main repo
-2. **Top-level module**: `kg/` instead of `mellea/stdlib/graph/`
-3. **Backends renamed**: `backends/` → `graph_dbs/` for clarity
-4. **Components reorganized**: Split into multiple files within `components/` module
-5. **LLM-guided code**: Moved from standalone `llm_guided.py` to `components/llm_guided.py`
-6. **Directory names**: `components/`, `sampling/`, and `requirements/` are mandatory
-7. **Dependencies**: Add all heavy dependencies (neo4j, rdflib, etc.) to `[kg]` group
-
 ---
 
 ## Core Design: Data Structures
@@ -187,7 +182,7 @@ class GraphEdge:
 ---
 
 ## Core Design: Components
-![KGRag example flowchart](GraphRag.drawio.svg)
+
 
 ### Mellea Component Pattern
 
