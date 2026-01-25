@@ -6,14 +6,7 @@ from mellea.contribs.kg.graph_dbs.mock import MockGraphBackend
 try:
     from mellea.contribs.kg.graph_dbs.neo4j import Neo4jBackend
 
-    __all__ = [
-        "GraphBackend",
-        "Neo4jBackend",
-        "MockGraphBackend",
-    ]
+    __all__ = ["GraphBackend", "MockGraphBackend", "Neo4jBackend"]
 except ImportError:
     # Neo4j driver not installed
-    __all__ = [
-        "GraphBackend",
-        "MockGraphBackend",
-    ]
+    __all__ = ["GraphBackend", "MockGraphBackend"]

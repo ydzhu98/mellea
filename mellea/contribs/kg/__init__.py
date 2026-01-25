@@ -5,8 +5,4 @@ Provides graph query components, backends, and LLM-guided query construction.
 
 from mellea.contribs.kg.base import GraphEdge, GraphNode, GraphPath
 
-__all__ = [
-    "GraphNode",
-    "GraphEdge",
-    "GraphPath",
-]
+__all__ = ["GraphEdge", "GraphNode", "GraphPath"]

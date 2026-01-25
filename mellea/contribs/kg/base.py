@@ -30,7 +30,7 @@ class GraphNode:
         """
         return cls(
             id=str(node.element_id),
-            label=list(node.labels)[0] if node.labels else "Unknown",
+            label=next(iter(node.labels)) if node.labels else "Unknown",
             properties=dict(node.items()),
         )
 
@@ -50,10 +50,7 @@ class GraphEdge:
 
     @classmethod
     def from_neo4j_relationship(
-        cls,
-        rel: Any,
-        source: GraphNode,
-        target: GraphNode,
+        cls, rel: Any, source: GraphNode, target: GraphNode
     ) -> "GraphEdge":
         """Create from Neo4j relationship object.
 

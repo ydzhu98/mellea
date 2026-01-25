@@ -11,9 +11,7 @@ class TestGraphNode:
     def test_create_graph_node(self):
         """Test creating a GraphNode."""
         node = GraphNode(
-            id="1",
-            label="Person",
-            properties={"name": "Alice", "age": 30},
+            id="1", label="Person", properties={"name": "Alice", "age": 30}
         )
 
         assert node.id == "1"
@@ -23,11 +21,7 @@ class TestGraphNode:
 
     def test_graph_node_empty_properties(self):
         """Test GraphNode with empty properties."""
-        node = GraphNode(
-            id="2",
-            label="Movie",
-            properties={},
-        )
+        node = GraphNode(id="2", label="Movie", properties={})
 
         assert node.id == "2"
         assert node.label == "Movie"
@@ -35,21 +29,9 @@ class TestGraphNode:
 
     def test_graph_node_equality(self):
         """Test GraphNode equality."""
-        node1 = GraphNode(
-            id="1",
-            label="Person",
-            properties={"name": "Alice"},
-        )
-        node2 = GraphNode(
-            id="1",
-            label="Person",
-            properties={"name": "Alice"},
-        )
-        node3 = GraphNode(
-            id="2",
-            label="Person",
-            properties={"name": "Bob"},
-        )
+        node1 = GraphNode(id="1", label="Person", properties={"name": "Alice"})
+        node2 = GraphNode(id="1", label="Person", properties={"name": "Alice"})
+        node3 = GraphNode(id="2", label="Person", properties={"name": "Bob"})
 
         assert node1 == node2
         assert node1 != node3
@@ -83,11 +65,7 @@ class TestGraphEdge:
         target = GraphNode(id="2", label="Movie", properties={})
 
         edge = GraphEdge(
-            id="e1",
-            source=source,
-            label="DIRECTED",
-            target=target,
-            properties={},
+            id="e1", source=source, label="DIRECTED", target=target, properties={}
         )
 
         assert edge.properties == {}
@@ -98,25 +76,13 @@ class TestGraphEdge:
         target = GraphNode(id="2", label="Movie", properties={"title": "The Matrix"})
 
         edge1 = GraphEdge(
-            id="e1",
-            source=source,
-            label="ACTED_IN",
-            target=target,
-            properties={},
+            id="e1", source=source, label="ACTED_IN", target=target, properties={}
         )
         edge2 = GraphEdge(
-            id="e1",
-            source=source,
-            label="ACTED_IN",
-            target=target,
-            properties={},
+            id="e1", source=source, label="ACTED_IN", target=target, properties={}
         )
         edge3 = GraphEdge(
-            id="e2",
-            source=source,
-            label="DIRECTED",
-            target=target,
-            properties={},
+            id="e2", source=source, label="DIRECTED", target=target, properties={}
         )
 
         assert edge1 == edge2
@@ -133,24 +99,13 @@ class TestGraphPath:
         node3 = GraphNode(id="3", label="Person", properties={"name": "Bob"})
 
         edge1 = GraphEdge(
-            id="e1",
-            source=node1,
-            label="ACTED_IN",
-            target=node2,
-            properties={},
+            id="e1", source=node1, label="ACTED_IN", target=node2, properties={}
         )
         edge2 = GraphEdge(
-            id="e2",
-            source=node3,
-            label="ACTED_IN",
-            target=node2,
-            properties={},
+            id="e2", source=node3, label="ACTED_IN", target=node2, properties={}
         )
 
-        path = GraphPath(
-            nodes=[node1, node2, node3],
-            edges=[edge1, edge2],
-        )
+        path = GraphPath(nodes=[node1, node2, node3], edges=[edge1, edge2])
 
         assert len(path.nodes) == 3
         assert len(path.edges) == 2

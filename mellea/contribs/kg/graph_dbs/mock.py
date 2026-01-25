@@ -49,9 +49,7 @@ class MockGraphBackend(GraphBackend):
         self.query_history: list[tuple[str, dict]] = []
 
     async def execute_query(
-        self,
-        query: "GraphQuery",
-        **execution_options,
+        self, query: "GraphQuery", **execution_options
     ) -> "GraphResult":
         """Execute a mock query.
 
@@ -88,9 +86,7 @@ class MockGraphBackend(GraphBackend):
         """
         return self.mock_schema
 
-    async def validate_query(
-        self, query: "GraphQuery"
-    ) -> tuple[bool, str | None]:
+    async def validate_query(self, query: "GraphQuery") -> tuple[bool, str | None]:
         """Validate mock query.
 
         Always returns True for mock queries.

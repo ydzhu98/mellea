@@ -1,6 +1,6 @@
 """Graph traversal patterns (minimal version for Layer 4 tests)."""
 
-from typing import Callable
+from collections.abc import Callable
 
 from mellea.contribs.kg.base import GraphEdge, GraphNode
 

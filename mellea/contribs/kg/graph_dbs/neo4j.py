@@ -10,12 +10,13 @@ if TYPE_CHECKING:
     from mellea.contribs.kg.components.result import GraphResult
 
 try:
-    import neo4j
-    from neo4j import AsyncGraphDatabase, GraphDatabase
-except ImportError:
-    raise ImportError(
-        "Neo4j driver not installed. Install with: pip install neo4j"
+    import neo4j  # type: ignore[import-not-found]
+    from neo4j import (  # type: ignore[import-not-found]
+        AsyncGraphDatabase,
+        GraphDatabase,
     )
+except ImportError:
+    raise ImportError("Neo4j driver not installed. Install with: pip install neo4j")
 
 
 class Neo4jBackend(GraphBackend):
@@ -49,19 +50,11 @@ class Neo4jBackend(GraphBackend):
         )
 
         # Create Neo4j drivers
-        self._driver = GraphDatabase.driver(
-            connection_uri,
-            auth=auth,
-        )
-        self._async_driver = AsyncGraphDatabase.driver(
-            connection_uri,
-            auth=auth,
-        )
+        self._driver = GraphDatabase.driver(connection_uri, auth=auth)
+        self._async_driver = AsyncGraphDatabase.driver(connection_uri, auth=auth)
 
     async def execute_query(
-        self,
-        query: "GraphQuery",
-        **execution_options,
+        self, query: "GraphQuery", **execution_options
     ) -> "GraphResult":
         """Execute a query in Neo4j.
 
@@ -106,8 +99,7 @@ class Neo4jBackend(GraphBackend):
         )
 
     def _parse_neo4j_result(
-        self,
-        records: list,
+        self, records: list
     ) -> tuple[list[GraphNode], list[GraphEdge], list[GraphPath]]:
         """Parse Neo4j records into GraphNode and GraphEdge objects.
 
@@ -138,6 +130,9 @@ class Neo4jBackend(GraphBackend):
 
                 elif isinstance(value, neo4j.graph.Relationship):
                     # Get source and target nodes
+                    # Neo4j relationships always have start_node and end_node
+                    assert value.start_node is not None
+                    assert value.end_node is not None
                     source_id = str(value.start_node.element_id)
                     target_id = str(value.end_node.element_id)
 
@@ -219,9 +214,7 @@ class Neo4jBackend(GraphBackend):
             "property_keys": property_keys,
         }
 
-    async def validate_query(
-        self, query: "GraphQuery"
-    ) -> tuple[bool, str | None]:
+    async def validate_query(self, query: "GraphQuery") -> tuple[bool, str | None]:
         """Validate Cypher query syntax.
 
         Uses Neo4j's EXPLAIN to validate without executing.
@@ -240,7 +233,7 @@ class Neo4jBackend(GraphBackend):
         except neo4j.exceptions.CypherSyntaxError as e:
             return False, str(e)
         except Exception as e:
-            return False, f"Validation error: {str(e)}"
+            return False, f"Validation error: {e!s}"
 
     def supports_query_type(self, query_type: str) -> bool:
         """Neo4j supports Cypher queries.

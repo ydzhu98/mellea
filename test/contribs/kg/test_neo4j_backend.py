@@ -25,8 +25,7 @@ except ImportError:
 
 # Skip all tests in this module if Neo4j is not available
 pytestmark = pytest.mark.skipif(
-    not NEO4J_AVAILABLE,
-    reason="Neo4j driver not installed"
+    not NEO4J_AVAILABLE, reason="Neo4j driver not installed"
 )
 
 
@@ -38,8 +37,7 @@ async def neo4j_backend():
     If connection fails, tests will be skipped.
     """
     backend = Neo4jBackend(
-        connection_uri="bolt://localhost:7687",
-        auth=("neo4j", "testpassword"),
+        connection_uri="bolt://localhost:7687", auth=("neo4j", "testpassword")
     )
 
     # Test connection
@@ -85,8 +83,7 @@ class TestNeo4jBackend:
     async def test_create_neo4j_backend(self):
         """Test creating a Neo4jBackend."""
         backend = Neo4jBackend(
-            connection_uri="bolt://localhost:7687",
-            auth=("neo4j", "password"),
+            connection_uri="bolt://localhost:7687", auth=("neo4j", "password")
         )
 
         assert backend.backend_id == "neo4j"
@@ -135,9 +132,7 @@ class TestNeo4jBackend:
     @pytest.mark.asyncio
     async def test_execute_simple_query(self, populated_neo4j_backend):
         """Test executing a simple query."""
-        query = GraphQuery(
-            query_string="MATCH (p:Person) RETURN p ORDER BY p.name"
-        )
+        query = GraphQuery(query_string="MATCH (p:Person) RETURN p ORDER BY p.name")
         result = await populated_neo4j_backend.execute_query(query)
 
         assert len(result.nodes) == 2
@@ -253,8 +248,7 @@ class TestNeo4jBackend:
     async def test_backend_close(self):
         """Test closing backend connections."""
         backend = Neo4jBackend(
-            connection_uri="bolt://localhost:7687",
-            auth=("neo4j", "testpassword"),
+            connection_uri="bolt://localhost:7687", auth=("neo4j", "testpassword")
         )
 
         # Should not raise

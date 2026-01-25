@@ -53,9 +53,7 @@ class GraphBackend(ABC):
 
     @abstractmethod
     async def execute_query(
-        self,
-        query: "GraphQuery",
-        **execution_options,
+        self, query: "GraphQuery", **execution_options
     ) -> "GraphResult":
         """Execute a graph query and return results.
 
@@ -106,9 +104,7 @@ class GraphBackend(ABC):
         return False
 
     async def execute_traversal(
-        self,
-        traversal: "GraphTraversal",
-        **execution_options,
+        self, traversal: "GraphTraversal", **execution_options
     ) -> "GraphResult":
         """Execute a high-level traversal pattern.
 
@@ -134,4 +130,3 @@ class GraphBackend(ABC):
 
         Default implementation does nothing. Subclasses should override if needed.
         """
-        pass

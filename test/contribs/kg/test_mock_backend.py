@@ -40,10 +40,7 @@ def mock_edges(mock_nodes):
 @pytest.fixture
 def mock_backend(mock_nodes, mock_edges):
     """Create a mock backend for testing."""
-    return MockGraphBackend(
-        mock_nodes=mock_nodes,
-        mock_edges=mock_edges,
-    )
+    return MockGraphBackend(mock_nodes=mock_nodes, mock_edges=mock_edges)
 
 
 class TestMockGraphBackend:
