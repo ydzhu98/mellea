@@ -62,8 +62,8 @@ flowchart TB
     style Layer4 fill:#f3e5f5,stroke:#6a1b9a,stroke-width:3px
 ```
 
-The following is an example of how the data flow through the system when user give a question. (Note, we use neo4j database as an example but the implimentation is graph database agnostic and the difference only exist in layer 4).
-![KGRag example flowchart](GraphRag.drawio.svg)
+The following is an example of how the data flow through the system when user give a question. (Note, we use neo4j database as an example but the implementation is graph database agnostic and the difference only exist in layer 4).
+![KGRag example flowchart](GraphRag.drawio.png)
 
 ---
 
