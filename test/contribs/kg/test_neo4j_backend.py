@@ -3,16 +3,27 @@
 These tests require a running Neo4j instance. They will be skipped if:
 - Neo4j is not installed
 - No Neo4j instance is available at the connection URI
+- Authentication fails
 
-To run these tests with Docker:
+To run these tests:
+
+1. Set environment variables (recommended):
+    export NEO4J_PASSWORD="your_password"
+    uv run pytest test/contribs/kg/test_neo4j_backend.py -v
+
+2. Or start Neo4j with Docker:
     docker run --rm -p 7687:7687 -p 7474:7474 \
         -e NEO4J_AUTH=neo4j/testpassword \
         neo4j:latest
+
+Note: Fixtures are defined in conftest.py and use environment variables:
+    - NEO4J_URI (default: bolt://localhost:7687)
+    - NEO4J_USER (default: neo4j)
+    - NEO4J_PASSWORD (default: testpassword)
 """
 
 import pytest
 
-from mellea.contribs.kg.base import GraphEdge, GraphNode
 from mellea.contribs.kg.components.query import GraphQuery
 
 try:
@@ -29,66 +40,23 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.fixture
-async def neo4j_backend():
-    """Create a Neo4j backend for testing.
-
-    Attempts to connect to a local Neo4j instance.
-    If connection fails, tests will be skipped.
-    """
-    backend = Neo4jBackend(
-        connection_uri="bolt://localhost:7687", auth=("neo4j", "testpassword")
-    )
-
-    # Test connection
-    try:
-        await backend.get_schema()
-        yield backend
-    except Exception as e:
-        pytest.skip(f"Could not connect to Neo4j: {e}")
-    finally:
-        await backend.close()
-
-
-@pytest.fixture
-async def populated_neo4j_backend(neo4j_backend):
-    """Create a Neo4j backend with test data."""
-    # Clear any existing data
-    clear_query = GraphQuery(query_string="MATCH (n) DETACH DELETE n")
-    await neo4j_backend.execute_query(clear_query)
-
-    # Create test data
-    create_query = GraphQuery(
-        query_string="""
-        CREATE (alice:Person {name: 'Alice', age: 30})
-        CREATE (bob:Person {name: 'Bob', age: 35})
-        CREATE (matrix:Movie {title: 'The Matrix', year: 1999})
-        CREATE (alice)-[:ACTED_IN {role: 'Trinity'}]->(matrix)
-        CREATE (bob)-[:ACTED_IN {role: 'Morpheus'}]->(matrix)
-        RETURN alice, bob, matrix
-        """
-    )
-    await neo4j_backend.execute_query(create_query)
-
-    yield neo4j_backend
-
-    # Cleanup
-    await neo4j_backend.execute_query(clear_query)
-
-
 class TestNeo4jBackend:
     """Tests for Neo4jBackend."""
 
     @pytest.mark.asyncio
-    async def test_create_neo4j_backend(self):
+    async def test_create_neo4j_backend(self, neo4j_credentials):
         """Test creating a Neo4jBackend."""
         backend = Neo4jBackend(
-            connection_uri="bolt://localhost:7687", auth=("neo4j", "password")
+            connection_uri=neo4j_credentials["uri"],
+            auth=(neo4j_credentials["user"], neo4j_credentials["password"]),
         )
 
         assert backend.backend_id == "neo4j"
-        assert backend.connection_uri == "bolt://localhost:7687"
-        assert backend.auth == ("neo4j", "password")
+        assert backend.connection_uri == neo4j_credentials["uri"]
+        assert backend.auth == (
+            neo4j_credentials["user"],
+            neo4j_credentials["password"],
+        )
 
         await backend.close()
 
@@ -245,10 +213,11 @@ class TestNeo4jBackend:
             await neo4j_backend.execute_query(query)
 
     @pytest.mark.asyncio
-    async def test_backend_close(self):
+    async def test_backend_close(self, neo4j_credentials):
         """Test closing backend connections."""
         backend = Neo4jBackend(
-            connection_uri="bolt://localhost:7687", auth=("neo4j", "testpassword")
+            connection_uri=neo4j_credentials["uri"],
+            auth=(neo4j_credentials["user"], neo4j_credentials["password"]),
         )
 
         # Should not raise
